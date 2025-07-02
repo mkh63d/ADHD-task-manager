@@ -1,12 +1,15 @@
+<script setup lang="ts">
+import UiShowcase from './components/UiShowcase.vue';
+import { supabase } from './services/supabase';
+import LoginPanel from './services/LoginPanel.vue';
+
+</script>
+
 <template>
   <div class="container">
-    <UiShowcase />
+    <LoginPanel />
   </div>
 </template>
-
-<script setup>
-import UiShowcase from './components/UiShowcase.vue'
-</script>
 
 <style scoped>
 .container {
