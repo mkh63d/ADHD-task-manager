@@ -1,13 +1,13 @@
-import { createRouter, createWebHistory } from 'vue-router'
-//import Home from '../views/Home.vue'
-//import About from '../views/About.vue'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import LoginPanel from '../views/LoginPanel.vue'
+import DisplayTasks from '../views/DisplayTasks.vue'
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   //{ path: '/', name: 'Home', component: Home },
   //{ path: '/about', name: 'About', component: About }
-  { path: 'login', name: 'Login', component: LoginPanel },
+  { path: '/login', name: 'Login', component: LoginPanel },
   { path: '/', redirect: { name: 'Login' } },
+  { path: '/task-manager', name: 'Task display', component: DisplayTasks }
   //{ path: 'tasks', name: 'Tasks', component: TasksView },
 ]
 
