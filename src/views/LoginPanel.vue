@@ -1,6 +1,9 @@
 <script setup>
 import { ref, inject } from 'vue';
 import { NCard, NForm, NFormItem, NInput, NButton, NFlex } from 'naive-ui';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const signIn = ref(true);
 
@@ -27,30 +30,38 @@ const signInUser = async () => {
     email: form.value.email,
     password: form.value.password,
   });
-  
+
   if (error) {
     console.error('Sign In Error:', error.message);
+  } else {
+    console.log('User signed in successfully');
+    router.push('/task-manager'); // Redirect to Task Manager after sign-in
   }
 };
 
 const signUpUser = async () => {
-  const { data: user, error } = await supabase.auth.signUp({
+  const { data: data, error } = await supabase.auth.signUp({
     email: form.value.email,
     password: form.value.password,
   });
-  
+
   if (error) {
     console.error('Sign Up Error:', error.message);
   }
 
-  if (user) {
-    supabase.from('users').insert([
-      {
-        id: user.user.id,
-        email: user.user.email,
-      },
-    ]);
-    console.log('User signed up successfully:', user);
+  if (data) {
+    const { error } = await supabase
+      .from('users')
+      .insert({
+        id: data.user.id,
+        email: data.user.email,
+      })
+      .single();
+    if (error) {
+      console.error('Error inserting user into database:', error.message);
+    } else {
+      console.log('User signed up successfully:', data);
+    }
   }
 };
 </script>
@@ -92,3 +103,5 @@ const signUpUser = async () => {
 </template>
 
 <style scoped></style>
+
+export default { name: 'LoginPanel', };

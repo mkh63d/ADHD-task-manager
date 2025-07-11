@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, inject } from 'vue';
+import { ref, inject, onMounted } from 'vue';
 import {
   NForm,
   NFormItem,
@@ -8,6 +8,7 @@ import {
   NFlex,
   NCard,
   NButton,
+  NModal
 } from 'naive-ui';
 
 const supabase = inject('supabase') as any;
@@ -23,14 +24,19 @@ const rules = {
 };
 
 //TODO: Create a storage for session data
-const { data: { session } } = await supabase.auth.getSession();
+const session = ref<any>(null);
+
+onMounted(async () => {
+  const { data } = await supabase.auth.getSession();
+  session.value = data.session;
+})
 
 const submitTask = async () => {
   const { error } = await supabase
     .from('tasks')
     .insert({
       title: taskForm.value.title,
-      user_id: session.user.id,
+      user_id: session.value.user.id,
       description: taskForm.value.description,
       dueTo: taskForm.value.dueDate ? new Date(taskForm.value.dueDate).toISOString() : null,
     })
@@ -43,11 +49,13 @@ const submitTask = async () => {
     taskForm.value = { title: '', description: '', dueDate: null };
   }
 };
+
+const showModal = ref(false);
 </script>
 
 <template>
-  <div class="container">
-    <n-card :title="'Task Manager'" class="m-5">
+  <n-modal v-model:show="showModal" @close="showModal = false">
+    <n-card :title="'Add task '" class="m-5">
       <n-flex vertical align="center" justify="center" style="height: 100%">
         <h2>Create a New Task</h2>
       </n-flex>
@@ -84,5 +92,6 @@ const submitTask = async () => {
         </n-button>
       </n-form>
     </n-card>
-  </div>
+  </n-modal>
 </template>
+

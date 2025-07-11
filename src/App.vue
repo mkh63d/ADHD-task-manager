@@ -2,11 +2,13 @@
 import UiShowcase from './components/UiShowcase.vue';
 import { supabase } from './services/supabase';
 import LoginPanel from './views/LoginPanel.vue';
-import { ref, onMounted, onUnmounted } from 'vue';
-import TaskManager from './views/TaskManager.vue';
+import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { Session } from '@supabase/supabase-js';
+//import { RouteComponent } from 'vue-router';
 
 const session = ref<Session | null>(null);
+
+const loggedIn = ref(false);
 
 onMounted(async () => {
   const {
@@ -17,6 +19,7 @@ onMounted(async () => {
   const { data: authListener } = supabase.auth.onAuthStateChange(
     (_event, newSession) => {
       session.value = newSession;
+      loggedIn.value = true;
     },
   );
 
@@ -30,12 +33,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="bg-gray-950 min-h-screen">
-    <div class="container">
-      <LoginPanel />
-      <TaskManager />
+  <!--<RouteComponent>-->
+    <div class="bg-gray-950 min-h-screen">
+      <router-view />
     </div>
-  </div>
+  <!--</RouteComponent>-->
 </template>
 
 <style scoped>
