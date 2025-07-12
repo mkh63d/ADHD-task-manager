@@ -58,8 +58,7 @@ const fetchTasks = async () => {
       <n-flex vertical align="center" justify="center" style="height: 100%">
         <h1 class="text-2xl font-bold mb-4">Your Tasks</h1>
         <n-button
-          strong
-          secondary
+          ghost
           type="primary"
           @click="
             () => {

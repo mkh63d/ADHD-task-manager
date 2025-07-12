@@ -4,6 +4,7 @@ import { supabase } from './services/supabase';
 import LoginPanel from './views/LoginPanel.vue';
 import { ref, onMounted, onUnmounted, watch } from 'vue';
 import { Session } from '@supabase/supabase-js';
+import { darkTheme } from 'naive-ui';
 //import { RouteComponent } from 'vue-router';
 
 const session = ref<Session | null>(null);
@@ -34,9 +35,11 @@ onMounted(async () => {
 
 <template>
   <!--<RouteComponent>-->
+  <n-config-provider :theme="darkTheme">
     <div class="bg-gray-950 min-h-screen">
       <router-view />
     </div>
+  </n-config-provider>
   <!--</RouteComponent>-->
 </template>
 
