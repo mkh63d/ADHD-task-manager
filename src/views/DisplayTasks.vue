@@ -4,10 +4,11 @@ import { supabase } from '../services/supabase';
 import { NButton, NModalProvider } from 'naive-ui';
 import { ref, onMounted } from 'vue';
 import AddTaskModal from '../components/AddTaskModal.vue';
+import { TaskType } from '../types/TaskType';
 
 //TODO: Create a storage for session data
 const session = ref<any>(null);
-const tasks = ref<any[]>([]);
+const tasks = ref<TaskType[]>([]);
 const showModal = ref(false);
 
 // Function to handle task submission
@@ -46,14 +47,12 @@ const fetchTasks = async () => {
     tasks.value = data || [];
   }
 };
-
-console.log('Fetched tasks:', tasks.value);
 </script>
 
 <template>
   <div class="container">
     <n-modal-provider>
-      <AddTaskModal v-model:show="showModal" @submitted="taskSubmitted"/>
+      <AddTaskModal v-model:show="showModal" @submitted="taskSubmitted" />
     </n-modal-provider>
     <n-card class="m-5">
       <n-flex vertical align="center" justify="center" style="height: 100%">
@@ -77,7 +76,12 @@ console.log('Fetched tasks:', tasks.value);
           v-else
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
-          <Task v-for="task in tasks" :key="task.task_id" :task="task" @deleted-or-updated="fetchTasks" />
+          <Task
+            v-for="task in tasks"
+            :key="task.task_id"
+            :task="task"
+            @deletedOrUpdated="fetchTasks"
+          />
         </div>
       </n-flex>
     </n-card>

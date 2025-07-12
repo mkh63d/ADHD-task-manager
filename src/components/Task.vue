@@ -1,9 +1,8 @@
 <script lang="ts">
-import { ref, defineComponent } from 'vue';
+import { ref, defineComponent, inject } from 'vue';
 import { NCard } from 'naive-ui';
 import { TaskType } from '../types/TaskType';
-
-const openDeleteModal = ref(false);
+import DeleteTaskModal from './DeleteTaskModal.vue';
 
 export default defineComponent({
   name: 'Task',
@@ -13,16 +12,40 @@ export default defineComponent({
       required: true,
     },
   },
-  emite: ['deletedOrUpdated'],
-  setup(props) {
-    const task = ref<TaskType>(props.task);
+  emits: ['deletedOrUpdated'],
+  setup(props, { emit }) {
+    const task = props.task;
+    const supabase = inject('supabase') as any;
+    const openDeleteModal = ref(false);
 
     //Update the task visibility state
     const updateShow = (value: boolean) => {
       openDeleteModal.value = value;
     };
 
-    return { task, openDeleteModal, updateShow };
+    const deleteTask = async () => {
+      if (!task) {
+        console.error('No task to delete');
+        return;
+      }
+
+      console.log('Deleting task:', task.task_id);
+
+      const { error } = await supabase
+        .from('tasks')
+        .delete()
+        .eq('task_id', task.task_id)
+        .single();
+
+      if (error) {
+        console.error('Error deleting task:', error.message);
+      }
+
+      emit('deletedOrUpdated')
+      openDeleteModal.value = false;
+    };
+
+    return { task, deleteTask, openDeleteModal, updateShow };
   },
 });
 </script>
@@ -38,7 +61,7 @@ export default defineComponent({
     <DeleteTaskModal
       v-model:show="openDeleteModal"
       :task="task"
-      @deleted="$emit('deletedOrUpdated')"
+      @delete="deleteTask"
       @opened="updateShow"
     />
   </n-modal-provider>

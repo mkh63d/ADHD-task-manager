@@ -63,7 +63,6 @@ const submitTask = async () => {
     return;
   }
 
-  console.log('Task successfully inserted:', taskForm.value);
   emit('submitted');
   taskForm.value = { title: '', description: '', dueTo: null };
 };
