@@ -10,6 +10,12 @@ const session = ref<any>(null);
 const tasks = ref<any[]>([]);
 const showModal = ref(false);
 
+// Function to handle task submission
+const taskSubmitted = () => {
+  showModal.value = false;
+  fetchTasks();
+};
+
 onMounted(async () => {
   const { data: sessionData, error: sessionError } =
     await supabase.auth.getSession();
@@ -20,6 +26,15 @@ onMounted(async () => {
     return;
   }
 
+  await fetchTasks();
+});
+
+const fetchTasks = async () => {
+  if (!session.value) {
+    console.error('Session is not available');
+    return;
+  }
+
   const { data, error } = await supabase
     .from('tasks')
     .select('*')
@@ -27,18 +42,18 @@ onMounted(async () => {
 
   if (error) {
     console.error('Error fetching tasks:', error.message);
+  } else {
+    tasks.value = data || [];
   }
+};
 
-  tasks.value = data || [];
-});
-
-console.log('Fetched tasks:', tasks);
+console.log('Fetched tasks:', tasks.value);
 </script>
 
 <template>
   <div class="container">
     <n-modal-provider>
-      <AddTaskModal v-model:show="showModal"/>
+      <AddTaskModal v-model:show="showModal" @submitted="taskSubmitted"/>
     </n-modal-provider>
     <n-card class="m-5">
       <n-flex vertical align="center" justify="center" style="height: 100%">
@@ -62,7 +77,7 @@ console.log('Fetched tasks:', tasks);
           v-else
           class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
-          <Task v-for="task in tasks" :key="task.id" :task="task" />
+          <Task v-for="task in tasks" :key="task.task_id" :task="task" @deleted-or-updated="fetchTasks" />
         </div>
       </n-flex>
     </n-card>

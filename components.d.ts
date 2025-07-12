@@ -10,6 +10,8 @@ declare module 'vue' {
   export interface GlobalComponents {
     AddTask: typeof import('./src/components/AddTask.vue')['default']
     AddTaskModal: typeof import('./src/components/AddTaskModal.vue')['default']
+    DeleteTaskModal: typeof import('./src/components/DeleteTaskModal.vue')['default']
+    NButton: typeof import('naive-ui')['NButton']
     NCard: typeof import('naive-ui')['NCard']
     NFlex: typeof import('naive-ui')['NFlex']
     NModal: typeof import('naive-ui')['NModal']

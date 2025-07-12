@@ -8,15 +8,19 @@ import {
   NFlex,
   NCard,
   NButton,
-  NModal
+  NModal,
 } from 'naive-ui';
 
 const supabase = inject('supabase') as any;
 
+const emit = defineEmits(['submitted']);
+
+const taskFormRef = ref();
+
 const taskForm = ref({
   title: '',
   description: '',
-  dueDate: null,
+  dueTo: null,
 });
 
 const rules = {
@@ -29,25 +33,39 @@ const session = ref<any>(null);
 onMounted(async () => {
   const { data } = await supabase.auth.getSession();
   session.value = data.session;
-})
+});
 
 const submitTask = async () => {
+  const formRef = taskFormRef.value;
+  if (!formRef) return;
+
+  try {
+    await formRef.validate();
+  } catch (validationError) {
+    console.warn('Form validation failed:', validationError);
+    return;
+  }
+
   const { error } = await supabase
     .from('tasks')
     .insert({
       title: taskForm.value.title,
       user_id: session.value.user.id,
       description: taskForm.value.description,
-      dueTo: taskForm.value.dueDate ? new Date(taskForm.value.dueDate).toISOString() : null,
+      dueTo: taskForm.value.dueTo
+        ? new Date(taskForm.value.dueTo).toISOString()
+        : null,
     })
     .single();
 
   if (error) {
     console.error('Error inserting task:', error.message);
-  } else {
-    console.log('Task successfully inserted:', taskForm.value);
-    taskForm.value = { title: '', description: '', dueDate: null };
+    return;
   }
+
+  console.log('Task successfully inserted:', taskForm.value);
+  emit('submitted');
+  taskForm.value = { title: '', description: '', dueTo: null };
 };
 
 const showModal = ref(false);
@@ -60,12 +78,12 @@ const showModal = ref(false);
         <h2>Create a New Task</h2>
       </n-flex>
       <n-form
-        ref="taskForm"
+        ref="taskFormRef"
         :model="taskForm"
         :rules="rules"
         label-placement="left"
       >
-        <n-form-item label="Task Name" path="taskName">
+        <n-form-item label="Task Name" path="title">
           <n-input
             v-model:value="taskForm.title"
             placeholder="Enter task name"
@@ -78,11 +96,11 @@ const showModal = ref(false);
             placeholder="Enter task description"
           />
         </n-form-item>
-        <n-form-item label="Due Date" path="dueDate">
+        <n-form-item label="Due Date" path="dueTo">
           <n-date-picker
             clearable
             type="datetime"
-            v-model:value="taskForm.dueDate"
+            v-model:value="taskForm.dueTo"
             :first-day-of-week="0"
             value-format="timestamp"
           />
@@ -94,4 +112,3 @@ const showModal = ref(false);
     </n-card>
   </n-modal>
 </template>
-

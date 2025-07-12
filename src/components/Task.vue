@@ -1,14 +1,9 @@
 <script lang="ts">
 import { ref, defineComponent } from 'vue';
 import { NCard } from 'naive-ui';
+import { TaskType } from '../types/TaskType';
 
-interface TaskType {
-  title: string;
-  description: string;
-  dueDate: string | null;
-  importance: number | null;
-  urgency: number | null;
-}
+const openDeleteModal = ref(false);
 
 export default defineComponent({
   name: 'Task',
@@ -18,9 +13,16 @@ export default defineComponent({
       required: true,
     },
   },
+  emite: ['deletedOrUpdated'],
   setup(props) {
     const task = ref<TaskType>(props.task);
-    return { task };
+
+    //Update the task visibility state
+    const updateShow = (value: boolean) => {
+      openDeleteModal.value = value;
+    };
+
+    return { task, openDeleteModal, updateShow };
   },
 });
 </script>
@@ -32,15 +34,25 @@ export default defineComponent({
 </style>
 
 <template>
+  <n-modal-provider>
+    <DeleteTaskModal
+      v-model:show="openDeleteModal"
+      :task="task"
+      @deleted="$emit('deletedOrUpdated')"
+      @opened="updateShow"
+    />
+  </n-modal-provider>
   <n-card
     medium
     :title="task.title"
     :segmented="{
       content: true,
     }"
+    closable
+    @close="openDeleteModal = true"
   >
     <p>{{ task.description }}</p>
-    <p>Due: {{ task.dueDate }}</p>
+    <p>Due: {{ task.dueTo }}</p>
     <p>Importance: {{ task.importance }}</p>
     <p>Urgency: {{ task.urgency }}</p>
   </n-card>
