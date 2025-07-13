@@ -1,0 +1,4 @@
+{
+  "**/*.{vue,ts,js}": ["eslint --max-warnings=0", "prettier --check"],
+  "**/*.{css,md,json}": "prettier --check"
+}
