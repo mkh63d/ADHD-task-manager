@@ -156,7 +156,7 @@ export default defineComponent({
       </n-space>
     </template>
     <p>{{ task.description }}</p>
-    <p>Due: {{ task.dueTo }}</p>
+    <p>Due: {{ task.dueTo ? new Date(task.dueTo).toLocaleString() : null }}</p>
     <p>Importance: {{ task.importance }}</p>
     <p>Urgency: {{ task.urgency }}</p>
   </n-card>
