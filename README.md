@@ -5,11 +5,10 @@ ensuring the best performance and efficiency, keeping it digitilized at the same
 
 ## Used task planning techniques
 ### 1. Ive Lee Rules
-    1. Plan from 3 to 6 tasks to do for the next day
-    2. Make your planning at the evening of the previous day - in order to avoid stacking your work day with decision making process.
-    3. Put tasks in the importance order (from most important to the least).
-    4. Tasks you have not managed to complete are passed to the next day.
-    5. 
+1. Plan from 3 to 6 tasks to do for the next day
+2. Make your planning at the evening of the previous day - in order to avoid stacking your work day with decision making process.
+3. Put tasks in the importance order (from most important to the least).
+4. Tasks you have not managed to complete are passed to the next day.
 
 ### 2. Eisenhower Matrix
 Important & Urgent - Start with them
@@ -35,3 +34,18 @@ Tasks are only a part of increasing productivity. In order to boost that it is h
 ## ADHD requirements
 - Minimalistic color design
 - Limited 
+
+## Functional & Non-functional requirements
+### Functional
+- Signing in
+- File storage
+- Different views of same data
+- public SDK widget (HTML 5 - WebComponent)
+- Google Calendar API
+- Remote database
+- Algorithm for rescheduling (+AI in edge cases)
+- Charts
+
+### Non-functional
+- i18n
+- multitheme support
