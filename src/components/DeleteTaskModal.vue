@@ -29,10 +29,12 @@ export default defineComponent({
     <n-card title="Delete Task" :segmented="{ content: true }">
       <p>Are you sure you want to delete this task?</p>
       <n-space class="mt-4">
-        <n-button type="error" ghost @click="$emit('delete')"
+        <n-button type="error"
+ghost @click="$emit('delete')"
           >Yes, delete</n-button
         >
-        <n-button class="ml-3" ghost @click="$emit('opened', false)"
+        <n-button class="ml-3"
+ghost @click="$emit('opened', false)"
           >Cancel</n-button
         >
       </n-space>

@@ -6,4 +6,3 @@ export interface TaskType {
   importance: number | null;
   urgency: number | null;
 }
-

@@ -23,7 +23,7 @@ export default defineConfig({
       ],
     }),
     Components({
-      resolvers: [NaiveUiResolver()]
-    })
+      resolvers: [NaiveUiResolver()],
+    }),
   ],
 });

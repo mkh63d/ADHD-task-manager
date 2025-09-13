@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { supabase } from './services/supabase';
-import LoginPanel from './views/LoginPanel.vue';
 import { ref, Ref, onMounted, onUnmounted, computed } from 'vue';
 import { Session } from '@supabase/supabase-js';
 import {
@@ -57,10 +56,7 @@ function toggleTheme() {
     }"
   >
     <n-global-style />
-    <div
-      class="min-h-screen"
-      :class="isDarkTheme ? 'bg-gray-950' : 'bg-white'"
-    >
+    <div class="min-h-screen" :class="isDarkTheme ? 'bg-gray-950' : 'bg-white'">
       <n-button @click="toggleTheme">
         Switch to {{ isDarkTheme ? 'Light' : 'Dark' }} Theme
       </n-button>

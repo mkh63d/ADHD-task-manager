@@ -90,7 +90,14 @@ export default defineComponent({
         <n-button ghost type="success" @click="$emit('updated')">
           Update Task
         </n-button>
-        <n-button class="ml-5" ghost type="error" @click="$emit('opened', false)"> Cancel </n-button>
+        <n-button
+          class="ml-5"
+          ghost
+          type="error"
+          @click="$emit('opened', false)"
+        >
+          Cancel
+        </n-button>
       </n-form>
     </n-card>
   </n-modal>

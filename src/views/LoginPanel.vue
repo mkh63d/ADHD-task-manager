@@ -68,10 +68,18 @@ const signUpUser = async () => {
 
 <template>
   <n-flex class="justify-items-center mb-4">
-    <n-button @click="signIn = true" :type="signIn ? 'primary' : 'default'" class="m-5">
+    <n-button
+      @click="signIn = true"
+      :type="signIn ? 'primary' : 'default'"
+      class="m-5"
+    >
       {{ 'Sign In' }}
     </n-button>
-    <n-button @click="signIn = false" :type="signIn ? 'default' : 'primary'" class="m-5">
+    <n-button
+      @click="signIn = false"
+      :type="signIn ? 'default' : 'primary'"
+      class="m-5"
+    >
       {{ 'Sign Up' }}
     </n-button>
   </n-flex>
