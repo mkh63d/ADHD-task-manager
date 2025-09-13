@@ -17,6 +17,12 @@ const taskSubmitted = () => {
   fetchTasks();
 };
 
+// Function to handle sign out
+const signOut = async () => {
+  await supabase.auth.signOut();
+  window.location.href = '/loginPanel';
+};
+
 onMounted(async () => {
   const { data: sessionData, error: sessionError } =
     await supabase.auth.getSession();
@@ -84,5 +90,12 @@ const fetchTasks = async () => {
         </div>
       </n-flex>
     </n-card>
+    <n-button
+      type="error"
+      class="mt-4"
+      @click="signOut"
+    >
+      Sign Out
+    </n-button>
   </div>
 </template>
