@@ -8,18 +8,16 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AddTask: typeof import('./src/components/AddTask.vue')['default']
     AddTaskModal: typeof import('./src/components/AddTaskModal.vue')['default']
+    CalendarTaskModal: typeof import('./src/components/CalendarTaskModal.vue')['default']
     DeleteTaskModal: typeof import('./src/components/DeleteTaskModal.vue')['default']
     EditTaskModal: typeof import('./src/components/EditTaskModal.vue')['default']
     NButton: typeof import('naive-ui')['NButton']
     NCard: typeof import('naive-ui')['NCard']
-    NConfigProvider: typeof import('naive-ui')['NConfigProvider']
     NDatePicker: typeof import('naive-ui')['NDatePicker']
     NFlex: typeof import('naive-ui')['NFlex']
     NForm: typeof import('naive-ui')['NForm']
     NFormItem: typeof import('naive-ui')['NFormItem']
-    NGlobalStyle: typeof import('naive-ui')['NGlobalStyle']
     NIcon: typeof import('naive-ui')['NIcon']
     NInput: typeof import('naive-ui')['NInput']
     NModal: typeof import('naive-ui')['NModal']
@@ -28,6 +26,5 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     Task: typeof import('./src/components/Task.vue')['default']
-    UiShowcase: typeof import('./src/components/UiShowcase.vue')['default']
   }
 }

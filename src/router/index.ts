@@ -5,14 +5,13 @@ import {
 } from 'vue-router';
 import LoginPanel from '../views/LoginPanel.vue';
 import DisplayTasks from '../views/DisplayTasks.vue';
+import CalendarView from '../views/CalendarView.vue';
 
 const routes: RouteRecordRaw[] = [
-  //{ path: '/', name: 'Home', component: Home },
-  //{ path: '/about', name: 'About', component: About }
   { path: '/login', name: 'Login', component: LoginPanel },
   { path: '/', redirect: { name: 'Login' } },
   { path: '/task-manager', name: 'Task display', component: DisplayTasks },
-  //{ path: 'tasks', name: 'Tasks', component: TasksView },
+  { path: '/calendar', name: 'Calendar', component: CalendarView },
 ];
 
 const router = createRouter({

@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import Task from '../components/Task.vue';
 import { supabase } from '../services/supabase';
-import { NButton, NModalProvider } from 'naive-ui';
+import { NButton, NModalProvider, NIcon } from 'naive-ui';
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import AddTaskModal from '../components/AddTaskModal.vue';
 import { TaskType } from '../types/TaskType';
+import { Calendar } from '@vicons/tabler';
+
+const router = useRouter();
 
 //TODO: Create a storage for session data
 const session = ref<any>(null);
@@ -20,7 +24,12 @@ const taskSubmitted = () => {
 // Function to handle sign out
 const signOut = async () => {
   await supabase.auth.signOut();
-  window.location.href = '/login';
+  router.push('/login');
+};
+
+// Navigate to calendar view
+const goToCalendar = () => {
+  router.push('/calendar');
 };
 
 onMounted(async () => {
@@ -62,7 +71,14 @@ const fetchTasks = async () => {
     </n-modal-provider>
     <n-card class="m-5">
       <n-flex vertical align="center" justify="center" style="height: 100%">
-        <h1 class="text-2xl font-bold mb-4">Your Tasks</h1>
+        <n-flex align="center" :size="16" class="mb-4">
+          <h1 class="text-2xl font-bold">Your Tasks</h1>
+          <n-button quaternary circle @click="goToCalendar">
+            <template #icon>
+              <n-icon><Calendar /></n-icon>
+            </template>
+          </n-button>
+        </n-flex>
         <n-button
           ghost
           type="primary"
