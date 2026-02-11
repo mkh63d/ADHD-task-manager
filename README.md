@@ -49,3 +49,8 @@ Tasks are only a part of increasing productivity. In order to boost that it is h
 ### Non-functional
 - i18n
 - multitheme support
+
+## Suggested future improvements:
+### WearOS app 
+- option to rate production time
+- start and manage focus time
