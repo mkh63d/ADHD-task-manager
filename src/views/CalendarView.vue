@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
-import { NButton, NCard, NFlex, NIcon, NSpace, NTag, NTooltip, NSwitch, NInputNumber, NPopover } from 'naive-ui';
+import { ref, computed, onMounted, watch } from 'vue';
+import { NButton, NCard, NFlex, NIcon, NSpace, NTag, NTooltip, NSwitch, NInputNumber, NPopover, NSelect } from 'naive-ui';
 import {
   ChevronLeft,
   ChevronRight,
@@ -9,10 +9,15 @@ import {
   List,
   Clock,
   Settings,
+  BrandGoogle,
+  MapPin,
+  ExternalLink,
 } from '@vicons/tabler';
 import { useTasks } from '../composables/useTasks';
+import { useEvents } from '../composables/useEvents';
 import CalendarTaskModal from '../components/CalendarTaskModal.vue';
 import type { TaskType } from '../types/TaskType';
+import type { EventType } from '../types/EventType';
 import { supabase } from '../services/supabase';
 import { useRouter } from 'vue-router';
 
@@ -30,22 +35,33 @@ const {
   getTasksWithoutDate,
 } = useTasks();
 
-// Calendar state
+const {
+  events,
+  loading: eventsLoading,
+  googleConnected,
+  calendars,
+  selectedCalendarId,
+  initGoogle,
+  connectGoogle,
+  disconnectGoogle,
+  fetchEvents,
+  getEventsForDate,
+  getEventsForDateAndHour,
+  getAllDayEventsForDate,
+} = useEvents();
+
 const currentDate = ref(new Date());
 const selectedDate = ref<Date | null>(null);
 const showTaskModal = ref(false);
 const editingTask = ref<TaskType | null>(null);
 const draggedTask = ref<TaskType | null>(null);
 
-// View modes
 const viewMode = ref<'month' | 'week' | 'day'>('month');
 
-// Work mode settings
 const workMode = ref(false);
 const workHoursStart = ref(8);
 const workHoursEnd = ref(22);
 
-// Calendar navigation
 const currentMonth = computed(() => currentDate.value.getMonth());
 const currentYear = computed(() => currentDate.value.getFullYear());
 
@@ -54,7 +70,7 @@ const monthNames = [
   'July', 'August', 'September', 'October', 'November', 'December',
 ];
 
-const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const headerText = computed(() => {
   if (viewMode.value === 'month') {
@@ -73,7 +89,6 @@ const headerText = computed(() => {
   return `${monthNames[weekStart.getMonth()]} ${weekStart.getDate()} - ${monthNames[weekEnd.getMonth()]} ${weekEnd.getDate()}, ${weekEnd.getFullYear()}`;
 });
 
-// Calendar grid generation
 const getWeekStart = (date: Date) => {
   const d = new Date(date);
   const day = d.getDay();
@@ -97,7 +112,6 @@ const getMonthDays = () => {
   const firstDay = new Date(currentYear.value, currentMonth.value, 1);
   const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0);
 
-  // Add days from previous month to fill the first week
   const startDay = firstDay.getDay();
   for (let i = startDay - 1; i >= 0; i--) {
     const d = new Date(firstDay);
@@ -105,12 +119,10 @@ const getMonthDays = () => {
     days.push(d);
   }
 
-  // Add days of current month
   for (let i = 1; i <= lastDay.getDate(); i++) {
     days.push(new Date(currentYear.value, currentMonth.value, i));
   }
 
-  // Add days from next month to complete the last week
   const remainingDays = 42 - days.length; // 6 rows × 7 days
   for (let i = 1; i <= remainingDays; i++) {
     const d = new Date(lastDay);
@@ -330,19 +342,73 @@ const isCurrentHour = (date: Date, hour: number) => {
   return isToday(date) && now.getHours() === hour;
 };
 
-// Sign out
 const signOut = async () => {
   await supabase.auth.signOut();
   router.push('/login');
 };
 
-// Navigate to list view
 const goToListView = () => {
   router.push('/task-manager');
 };
 
-onMounted(() => {
+const getViewDateRange = () => {
+  if (viewMode.value === 'month') {
+    const firstDay = new Date(currentYear.value, currentMonth.value, 1);
+    const lastDay = new Date(currentYear.value, currentMonth.value + 1, 0);
+
+    firstDay.setDate(firstDay.getDate() - 7);
+    lastDay.setDate(lastDay.getDate() + 7);
+    return { start: firstDay, end: lastDay };
+  } else if (viewMode.value === 'week') {
+    const weekStart = getWeekStart(currentDate.value);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+    return { start: weekStart, end: weekEnd };
+  } else {
+    const dayStart = new Date(currentDate.value);
+    dayStart.setHours(0, 0, 0, 0);
+    const dayEnd = new Date(dayStart);
+    dayEnd.setDate(dayEnd.getDate() + 1);
+    return { start: dayStart, end: dayEnd };
+  }
+};
+
+const refreshEvents = async () => {
+  if (googleConnected.value) {
+    const { start, end } = getViewDateRange();
+    await fetchEvents(start, end);
+  }
+};
+
+const formatEventTime = (event: EventType) => {
+  if (event.allDay) return 'All day';
+  const start = new Date(event.startDate);
+  return start.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+};
+
+const openEventInGoogle = (event: EventType) => {
+  if (event.htmlLink) {
+    window.open(event.htmlLink, '_blank');
+  }
+};
+
+const calendarOptions = computed(() =>
+  calendars.value.map((cal) => ({
+    label: cal.summary + (cal.primary ? ' (Primary)' : ''),
+    value: cal.id,
+  }))
+);
+
+watch([currentDate, viewMode, selectedCalendarId], () => {
+  refreshEvents();
+});
+
+onMounted(async () => {
   fetchTasks();
+  await initGoogle();
+  if (googleConnected.value) {
+    await refreshEvents();
+  }
 });
 
 const unscheduledTasks = computed(() => getTasksWithoutDate());
@@ -455,6 +521,55 @@ const unscheduledTasks = computed(() => getTasksWithoutDate());
             Add Task
           </n-button>
 
+          <!-- Google Calendar Integration -->
+          <n-popover trigger="click">
+            <template #trigger>
+              <n-button :type="googleConnected ? 'success' : 'default'" ghost>
+                <template #icon>
+                  <n-icon><BrandGoogle /></n-icon>
+                </template>
+                {{ googleConnected ? 'Connected' : 'Google Calendar' }}
+              </n-button>
+            </template>
+            <div class="p-2 space-y-3 min-w-48">
+              <template v-if="!googleConnected">
+                <p class="text-sm text-gray-400 mb-2">
+                  Connect to import events from Google Calendar
+                </p>
+                <n-button type="primary" block @click="connectGoogle" :loading="eventsLoading">
+                  Connect Google Calendar
+                </n-button>
+              </template>
+              <template v-else>
+                <div class="space-y-2">
+                  <p class="text-sm text-gray-400">Select calendar:</p>
+                  <n-select
+                    v-model:value="selectedCalendarId"
+                    :options="calendarOptions"
+                    size="small"
+                  />
+                  <n-button
+                    size="small"
+                    block
+                    @click="refreshEvents"
+                    :loading="eventsLoading"
+                  >
+                    Refresh Events
+                  </n-button>
+                  <n-button
+                    type="error"
+                    ghost
+                    size="small"
+                    block
+                    @click="disconnectGoogle"
+                  >
+                    Disconnect
+                  </n-button>
+                </div>
+              </template>
+            </div>
+          </n-popover>
+
           <n-button type="error" ghost @click="signOut">Sign Out</n-button>
         </n-flex>
       </n-flex>
@@ -514,8 +629,43 @@ const unscheduledTasks = computed(() => getTasksWithoutDate());
                 </n-button>
               </div>
 
-              <!-- Tasks for this day -->
+              <!-- Tasks and Events for this day -->
               <div class="space-y-1 overflow-y-auto max-h-20">
+                <!-- Google Calendar Events -->
+                <div
+                  v-for="event in getEventsForDate(day)"
+                  :key="event.id"
+                  class="event-item p-1 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity bg-purple-900/60 border-l-2 border-purple-400"
+                  @click.stop="openEventInGoogle(event)"
+                >
+                  <n-tooltip trigger="hover">
+                    <template #trigger>
+                      <div class="truncate flex items-center gap-1">
+                        <span class="text-purple-300">
+                          {{ formatEventTime(event) }}
+                        </span>
+                        {{ event.title }}
+                        <n-icon v-if="event.location" size="10" class="text-gray-400">
+                          <MapPin />
+                        </n-icon>
+                      </div>
+                    </template>
+                    <div>
+                      <div class="flex items-center gap-1">
+                        <strong>{{ event.title }}</strong>
+                        <n-icon size="12"><ExternalLink /></n-icon>
+                      </div>
+                      <p v-if="event.location" class="text-sm mt-1 text-gray-300">
+                        📍 {{ event.location }}
+                      </p>
+                      <p v-if="event.description" class="text-sm mt-1">
+                        {{ event.description }}
+                      </p>
+                    </div>
+                  </n-tooltip>
+                </div>
+
+                <!-- Tasks -->
                 <div
                   v-for="task in getTasksForDate(day)"
                   :key="task.task_id"
@@ -607,8 +757,40 @@ const unscheduledTasks = computed(() => getTasksWithoutDate());
                   @drop="handleDropWithHour($event, day, hour)"
                   @dblclick="openAddTaskWithTime(day, hour)"
                 >
-                  <!-- Tasks for this hour -->
-                  <div class="overflow-hidden h-full">
+                  <!-- Events and Tasks for this hour -->
+                  <div class="overflow-hidden h-full space-y-0.5">
+                    <!-- Google Calendar Events -->
+                    <div
+                      v-for="event in getEventsForDateAndHour(day, hour)"
+                      :key="event.id"
+                      class="event-item px-1 py-0.5 rounded text-xs cursor-pointer hover:opacity-80 transition-opacity truncate bg-purple-900/80 border-l-2 border-purple-400"
+                      @click.stop="openEventInGoogle(event)"
+                    >
+                      <n-tooltip trigger="hover">
+                        <template #trigger>
+                          <div class="truncate flex items-center gap-1">
+                            <span class="text-purple-300">
+                              {{ formatEventTime(event) }}
+                            </span>
+                            {{ event.title }}
+                          </div>
+                        </template>
+                        <div>
+                          <div class="flex items-center gap-1">
+                            <strong>{{ event.title }}</strong>
+                            <n-icon size="12"><ExternalLink /></n-icon>
+                          </div>
+                          <p v-if="event.location" class="text-sm mt-1 text-gray-300">
+                            📍 {{ event.location }}
+                          </p>
+                          <p v-if="event.description" class="text-sm mt-1">
+                            {{ event.description }}
+                          </p>
+                        </div>
+                      </n-tooltip>
+                    </div>
+
+                    <!-- Tasks -->
                     <div
                       v-for="task in getTasksForDateAndHour(day, hour)"
                       :key="task.task_id"
